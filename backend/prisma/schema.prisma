@@ -1,0 +1,76 @@
+// Mentis veritabanı şeması — PostgreSQL (Supabase'de host edilir)
+// Prisma ORM ile model katmanı. Migration komutları ile tablolar oluşur.
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// Terapist hesabı. Her terapist kendi danışanlarını yönetir.
+model Therapist {
+  id           String         @id @default(uuid())
+  username     String         @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime       @default(now())
+
+  clients      ClientAccount[]
+
+  @@map("therapists")
+}
+
+/// Danışan hesabı. Yalnızca bir terapiste bağlıdır (FK).
+/// Login için kullanıcı adı + şifre.
+model ClientAccount {
+  id           String         @id @default(uuid())
+  username     String         @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime       @default(now())
+
+  therapistId  String
+  therapist    Therapist      @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+
+  journals     JournalEntry[]
+  appointments Appointment[]
+
+  @@map("client_accounts")
+}
+
+/// Danışanın yazdığı tek bir günlük girişi.
+model JournalEntry {
+  id         String        @id @default(uuid())
+  clientId   String
+  client     ClientAccount @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  content    String        @db.Text
+  mood       String        // "great" | "happy" | "normal" | "sad" | "anxious" | "angry"
+  dayOfWeek  String        // "Pazartesi", "Salı", ...
+  date       DateTime
+  createdAt  DateTime      @default(now())
+
+  @@index([clientId, date])
+  @@map("journal_entries")
+}
+
+/// Bir randevu. Terapist onaylar.
+model Appointment {
+  id         String        @id @default(uuid())
+  clientId   String
+  client     ClientAccount @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  timeSlot   String        // "10:00"
+  dayOfWeek  String        // "Pazartesi"
+  note       String        @default("")
+  confirmed  Boolean       @default(false)
+  createdAt  DateTime      @default(now())
+
+  @@unique([dayOfWeek, timeSlot]) // çift rezervasyon engellenir
+  @@map("appointments")
+}

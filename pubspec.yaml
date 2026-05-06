@@ -1,0 +1,35 @@
+name: mentis
+description: "MindBridge — AI destekli terapi uygulaması (mezuniyet projesi)."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+  flutter: ">=3.27.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+
+  # Ağ ve depolama
+  http: ^1.2.0
+  shared_preferences: ^2.2.2
+
+  # Yardımcılar
+  intl: ^0.19.0
+
+  # Kamera (video seans için ön kamera preview).
+  # camera paketi iOS'ta kamera iznini otomatik olarak ister
+  # (Info.plist > NSCameraUsageDescription).
+  camera: ^0.11.0
+
+  # Gerçek yüz tespiti (Google ML Kit, on-device).
+  # permission_handler eklenmedi; camera paketi izni kendi alıyor.
+  google_mlkit_face_detection: ^0.13.0
+
+dev_dependencies:
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true

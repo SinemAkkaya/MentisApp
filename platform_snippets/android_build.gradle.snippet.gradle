@@ -1,0 +1,23 @@
+// android/app/build.gradle dosyasındaki defaultConfig bloğu:
+//
+//     defaultConfig {
+//         applicationId "com.example.mentis"
+//         minSdkVersion 21          // ← BUNU EKLE / DEĞİŞTİR
+//         targetSdkVersion flutter.targetSdkVersion
+//         versionCode flutterVersionCode.toInteger()
+//         versionName flutterVersionName
+//         multiDexEnabled true      // ← opsiyonel ama önerilir
+//     }
+//
+// Firebase için ayrıca android/build.gradle dosyasında:
+//
+//     dependencies {
+//         classpath 'com.google.gms:google-services:4.4.2'
+//     }
+//
+// android/app/build.gradle dosyasının EN ALTINA:
+//
+//     apply plugin: 'com.google.gms.google-services'
+//
+// NOT: flutterfire configure komutu google-services.json'u
+// android/app/ altına otomatik kopyalar.
