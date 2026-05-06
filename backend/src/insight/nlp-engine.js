@@ -217,17 +217,19 @@ function analyzeMultipleJournals(journals) {
   const dominantCategory = Object.entries(categoryTotals)
     .sort((a, b) => b[1] - a[1])[0][0];
 
-  // En sık anahtar kelimeler
-  const allKeywords = {};
-  analyses.forEach(a => {
-    a.topKeywords.forEach(kw => {
-      allKeywords[kw.word] = (allKeywords[kw.word] || 0) + kw.count;
-    });
-  });
-  const topKeywords = Object.entries(allKeywords)
+  // Duygu kategorileri — frequency değil, meaningful categories göster
+  const emotionCategories = {
+    stress: categoryTotals.work + categoryTotals.anxiety,
+    anxiety: categoryTotals.anxiety,
+    depression: categoryTotals.depression,
+    social: categoryTotals.social,
+    sleep: categoryTotals.sleep,
+    happiness: analyses.filter(a => a.sentiment.score > 0.3).length,
+  };
+  const topKeywords = Object.entries(emotionCategories)
+    .filter(([_, count]) => count > 0)
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 6)
-    .map(([word, count]) => ({ word, count }));
+    .map(([category, count]) => ({ word: category, count }));
 
   // Risk seviyesi
   let riskLevel = 'low';

@@ -4,7 +4,7 @@
 
 const express = require('express');
 const { authRequired, therapistOnly } = require('../middleware/jwt');
-const { analyzeMultipleJournals } = require('../insight/nlp-engine');
+const { analyzeMultipleJournals } = require('../insight/nlp-engine-v2');
 const { demoClients, mockJournals } = require('../shared/stores');
 
 const router = express.Router();
@@ -48,6 +48,13 @@ router.post('/', async (req, res) => {
   }
 
   console.log(`✅ Insight analizi tamamlandı (${analysis.analyzedCount} günlük, danışan: ${clientName})`);
+
+  // Duygu kategorilerini topWords format'ına çevir
+  const topWords = Object.entries(analysis.categories || {})
+    .filter(([_, count]) => count > 0)
+    .sort((a, b) => b[1] - a[1])
+    .map(([word, count]) => ({ word, count }));
+
   res.json({
     clientName,
     mentisScore: analysis.mentisScore,
@@ -57,20 +64,22 @@ router.post('/', async (req, res) => {
       histogram: {},
     },
     risk: {
-      score: analysis.riskLevel === 'critical' ? 80 : (analysis.riskLevel === 'high' ? 60 : (analysis.riskLevel === 'moderate' ? 40 : 20)),
+      score: analysis.riskLevel === 'critical' ? 90 : (analysis.riskLevel === 'high' ? 60 : (analysis.riskLevel === 'moderate' ? 40 : 20)),
       level: analysis.riskLevel,
       triggers: analysis.riskTriggers,
     },
-    topWords: analysis.topKeywords,
+    topWords,
     recommendation: {
-      title: 'Mentis Önerileri',
+      title: 'Mentis Terapist Önerileri',
       tone: analysis.sentiment.label,
       message: analysis.recommendations.join(' • '),
     },
-    moodTrend: analysis.moodTrend,
+    moodTrend: analysis.trend || analysis.moodTrend,
     dominantCategory: analysis.dominantCategory,
     analyzedCount: analysis.analyzedCount,
     hasData: analysis.analyzedCount > 0,
+    intensity: analysis.intensity || 0,
+    detailedMetrics: analysis.detailedMetrics,
   });
 });
 

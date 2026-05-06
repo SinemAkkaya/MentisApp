@@ -386,6 +386,8 @@ class MentisInsight {
   final Recommendation recommendation;
   final int analyzedCount;
   final bool hasData;
+  final int intensity; // 0-10 şiddet seviyesi
+  final String moodTrend; // "improving", "declining", "stable"
 
   MentisInsight({
     required this.clientName,
@@ -396,6 +398,8 @@ class MentisInsight {
     required this.recommendation,
     required this.analyzedCount,
     required this.hasData,
+    required this.intensity,
+    required this.moodTrend,
   });
 
   factory MentisInsight.fromJson(Map<String, dynamic> m) {
@@ -418,6 +422,8 @@ class MentisInsight {
           (m['recommendation'] as Map<String, dynamic>?) ?? const {}),
       analyzedCount: (m['analyzedCount'] as num?)?.toInt() ?? 0,
       hasData: m['hasData'] == true,
+      intensity: (m['intensity'] as num?)?.toInt() ?? 0,
+      moodTrend: m['moodTrend']?.toString() ?? 'stable',
     );
   }
 }

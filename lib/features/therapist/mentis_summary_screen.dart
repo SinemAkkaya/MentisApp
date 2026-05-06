@@ -334,8 +334,16 @@ class _MentisSummaryScreenState extends State<MentisSummaryScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Trend göstergesi
+        _buildTrendIndicator(insight),
+        const SizedBox(height: 16),
+
         // Mentis Score Card
         _buildMentisScoreCard(insight),
+        const SizedBox(height: 16),
+
+        // Intensity göstergesi
+        _buildIntensityCard(insight),
         const SizedBox(height: 16),
 
         // Risk Card
@@ -346,15 +354,124 @@ class _MentisSummaryScreenState extends State<MentisSummaryScreen> {
         _buildSentimentCard(insight),
         const SizedBox(height: 16),
 
-        // Anahtar Kelimeler
+        // Duygu Kategorileri
         if (insight.topWords.isNotEmpty) ...[
           _buildKeywordsCard(insight),
           const SizedBox(height: 16),
         ],
 
-        // Öneriler
+        // Terapist Önerileri
         _buildRecommendationsCard(insight),
       ],
+    );
+  }
+
+  Widget _buildTrendIndicator(MentisInsight insight) {
+    final trendIcon = insight.moodTrend == 'improving'
+        ? '📈'
+        : (insight.moodTrend == 'declining'
+            ? '📉'
+            : '➡️');
+
+    final trendLabel = insight.moodTrend == 'improving'
+        ? 'İyileşme Trendi'
+        : (insight.moodTrend == 'declining'
+            ? 'Kötüleşme Trendi'
+            : 'Stabil');
+
+    final trendColor = insight.moodTrend == 'improving'
+        ? Colors.green
+        : (insight.moodTrend == 'declining'
+            ? AppColors.danger
+            : Colors.blue);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: trendColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: trendColor.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Text(trendIcon, style: const TextStyle(fontSize: 20)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Ruh Hali Trendi',
+                    style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                Text(trendLabel,
+                    style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: trendColor)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIntensityCard(MentisInsight insight) {
+    // Intensity 0-10 şiddet seviyesi
+    final intensityLabel = insight.intensity > 7
+        ? 'Yüksek Şiddet'
+        : (insight.intensity > 4
+            ? 'Orta Şiddet'
+            : 'Düşük Şiddet');
+
+    final intensityColor = insight.intensity > 7
+        ? AppColors.danger
+        : (insight.intensity > 4
+            ? AppColors.warning
+            : Colors.green);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: intensityColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: intensityColor.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.local_fire_department_rounded,
+                  color: AppColors.secondary),
+              const SizedBox(width: 8),
+              const Text('Emotional Intensity',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+              const Spacer(),
+              Text('${insight.intensity}/10',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                      color: intensityColor)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              value: insight.intensity / 10,
+              minHeight: 8,
+              backgroundColor: Colors.grey[200],
+              valueColor: AlwaysStoppedAnimation(intensityColor),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(intensityLabel,
+              style: TextStyle(
+                  fontSize: 12,
+                  color: intensityColor,
+                  fontWeight: FontWeight.w600)),
+        ],
+      ),
     );
   }
 
@@ -528,6 +645,25 @@ class _MentisSummaryScreenState extends State<MentisSummaryScreen> {
   }
 
   Widget _buildKeywordsCard(MentisInsight insight) {
+    // Duygu kategorileri için emoji ve label haritası
+    final emotionEmojis = {
+      'stress': '⚠️',
+      'anxiety': '😰',
+      'depression': '😢',
+      'social': '👥',
+      'sleep': '😴',
+      'happiness': '😊',
+    };
+
+    final emotionLabels = {
+      'stress': 'Stres',
+      'anxiety': 'Anksiyete',
+      'depression': 'Depresyon',
+      'social': 'Sosyal',
+      'sleep': 'Uyku',
+      'happiness': 'Mutluluk',
+    };
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -542,21 +678,37 @@ class _MentisSummaryScreenState extends State<MentisSummaryScreen> {
             children: [
               Icon(Icons.tag_rounded, color: Colors.purple),
               SizedBox(width: 8),
-              Text('Anahtar Kelimeler',
+              Text('Duygu Kategorileri',
                   style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
             ],
           ),
           const SizedBox(height: 10),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: 10,
+            runSpacing: 10,
             children: insight.topWords
-                .map((kw) => Chip(
-                      label: Text(kw.word,
-                          style: const TextStyle(fontSize: 11)),
-                      backgroundColor: Colors.purple.withValues(alpha: 0.15),
-                      side: BorderSide(
-                          color: Colors.purple.withValues(alpha: 0.3)),
+                .map((kw) => Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.purple.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                            color: Colors.purple.withValues(alpha: 0.3)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(emotionEmojis[kw.word] ?? '🏷️',
+                              style: const TextStyle(fontSize: 14)),
+                          const SizedBox(width: 6),
+                          Text(
+                            '${emotionLabels[kw.word] ?? kw.word}: ${kw.count}',
+                            style: const TextStyle(
+                                fontSize: 12, fontWeight: FontWeight.w500),
+                          ),
+                        ],
+                      ),
                     ))
                 .toList(),
           ),
