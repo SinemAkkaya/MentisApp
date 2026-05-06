@@ -5,7 +5,7 @@
 const express = require('express');
 const prisma = require('../prisma');
 const { authRequired } = require('../middleware/jwt');
-const { mockJournals } = require('../shared/stores');
+const { mockJournals, demoClients } = require('../shared/stores');
 
 const router = express.Router();
 
@@ -24,11 +24,15 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ error: 'bad_request', message: 'content, mood, dayOfWeek, date gerekli.' });
   }
 
-  // 🔥 DEMO MOD: In-memory store'a ekle
+  // 🔥 DEMO MOD: In-memory store'a ekle + clientName ekle
   const journalId = `journal-${Date.now()}`;
+  const client = demoClients.get(req.user.id);
+  const clientName = client?.name || req.user.name || 'Anonim';
+
   const newEntry = {
     id: journalId,
     clientId: req.user.id,
+    clientName: clientName,
     content: String(content).trim(),
     mood: String(mood),
     dayOfWeek: String(dayOfWeek),
@@ -36,7 +40,7 @@ router.post('/', async (req, res) => {
     createdAt: new Date(),
   };
   mockJournals.set(journalId, newEntry);
-  console.log(`✅ [DEMO] Günlük kaydedildi: ${mood}`);
+  console.log(`✅ [DEMO] Günlük kaydedildi: ${clientName} - ${mood}`);
   res.status(201).json(newEntry);
 });
 
@@ -66,6 +70,15 @@ router.get('/', async (req, res) => {
   // Limit
   const limit = parseInt(req.query.limit) || 50;
   journalList = journalList.slice(0, limit);
+
+  // clientName'i ekle (eğer yoksa)
+  journalList = journalList.map(j => {
+    if (!j.clientName && j.clientId) {
+      const client = demoClients.get(j.clientId);
+      return { ...j, clientName: client?.name || 'Anonim' };
+    }
+    return j;
+  });
 
   console.log(`✅ [DEMO] Günlük listesi (${journalList.length} entry)`);
   res.json(journalList);

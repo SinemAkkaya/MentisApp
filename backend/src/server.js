@@ -12,6 +12,7 @@ const clientRoutes = require('./routes/clients');
 const journalRoutes = require('./routes/journals');
 const appointmentRoutes = require('./routes/appointments');
 const insightRoutes = require('./routes/insight');
+const sessionLinksRoutes = require('./routes/session-links');
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.use('/clients', clientRoutes);
 app.use('/journals', journalRoutes);
 app.use('/appointments', appointmentRoutes);
 app.use('/insight', insightRoutes);
+app.use('/session-links', sessionLinksRoutes);
 
 // 404
 app.use((req, res) => {

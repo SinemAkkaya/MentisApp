@@ -9,11 +9,10 @@ import '../../models/journal_entry.dart';
 import '../../models/user_model.dart';
 import '../../services/api_service.dart';
 import '../auth/login_screen.dart';
-import '../video/video_session_picker.dart';
-import '../video/video_session_screen.dart';
 import 'mentis_summary_screen.dart';
 import 'clients_management_screen.dart';
 import 'therapist_calendar_screen.dart';
+import 'send_session_link_dialog.dart';
 
 class TherapistHomeScreen extends StatefulWidget {
   const TherapistHomeScreen({super.key, required this.user});
@@ -329,14 +328,15 @@ class _TherapistHomeScreenState extends State<TherapistHomeScreen> {
             children: [
               Expanded(
                 child: _ActionButton(
-                  label: 'Video Seans',
-                  icon: Icons.videocam_rounded,
+                  label: 'Danışana Link Gönder',
+                  icon: Icons.send_rounded,
                   color: AppColors.info,
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const VideoSessionPicker(
-                        role: SessionRole.therapist,
-                      ),
+                  onTap: () => showDialog<void>(
+                    context: context,
+                    builder: (dialogCtx) => SendSessionLinkDialog(
+                      clientId: '',
+                      clientName: '',
+                      isPickClient: true,
                     ),
                   ),
                 ),

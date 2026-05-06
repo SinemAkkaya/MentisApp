@@ -9,10 +9,9 @@ import '../../models/journal_entry.dart';
 import '../../models/user_model.dart';
 import '../../services/api_service.dart';
 import '../auth/login_screen.dart';
-import '../video/video_session_picker.dart';
-import '../video/video_session_screen.dart';
 import 'appointment_screen.dart';
 import 'journal_screen.dart';
+import 'session_links_screen.dart';
 
 class ClientHomeScreen extends StatefulWidget {
   const ClientHomeScreen({super.key, required this.user});
@@ -181,12 +180,11 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   Widget _buildMenuGrid() {
     return GridView.count(
       shrinkWrap: true,
-      crossAxisCount: 3,
+      crossAxisCount: 2,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisSpacing: 12,
       mainAxisSpacing: 12,
-      // KRİTİK DÜZELTME: Ekran taşmasını önlemek için 0.92 yerine 0.78 yapıldı
-      childAspectRatio: 0.78,
+      childAspectRatio: 0.92,
       children: [
         _MenuCard(
           title: 'Günlüğüm',
@@ -209,13 +207,12 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
           ),
         ),
         _MenuCard(
-          title: 'Video Seans',
-          icon: Icons.videocam_rounded,
-          color: AppColors.info,
+          title: 'Bağlantılar',
+          icon: Icons.link_rounded,
+          color: const Color(0xFF8366FF),
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) =>
-                  const VideoSessionPicker(role: SessionRole.client),
+              builder: (_) => const SessionLinksScreen(),
             ),
           ),
         ),

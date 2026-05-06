@@ -6,6 +6,7 @@ import '../../core/utils/date_utils_tr.dart';
 import '../../models/client_account.dart';
 import '../../services/api_service.dart';
 import 'add_client_dialog.dart';
+import 'send_session_link_dialog.dart';
 
 /// Terapistin kendi danışanları için kullanıcı adı + şifre oluşturduğu ekran.
 /// Sadece bu listedeki hesaplar danışan girişi yapabilir.
@@ -61,6 +62,7 @@ class _ClientsManagementScreenState extends State<ClientsManagementScreen> {
                 return _ClientCard(
                   account: c,
                   onDelete: () => _confirmDelete(c),
+                  onSendVideo: () => _sendVideoLink(c),
                 );
               },
             );
@@ -170,6 +172,16 @@ class _ClientsManagementScreenState extends State<ClientsManagementScreen> {
     );
   }
 
+  void _sendVideoLink(ClientAccount account) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => SendSessionLinkDialog(
+        clientId: account.id,
+        clientName: account.name,
+      ),
+    );
+  }
+
   Future<void> _confirmDelete(ClientAccount account) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -244,9 +256,14 @@ class _ClientsManagementScreenState extends State<ClientsManagementScreen> {
 }
 
 class _ClientCard extends StatelessWidget {
-  const _ClientCard({required this.account, required this.onDelete});
+  const _ClientCard({
+    required this.account,
+    required this.onDelete,
+    required this.onSendVideo,
+  });
   final ClientAccount account;
   final VoidCallback onDelete;
+  final VoidCallback onSendVideo;
 
   @override
   Widget build(BuildContext context) {
@@ -319,6 +336,12 @@ class _ClientCard extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+          IconButton(
+            tooltip: 'Video Bağlantısı Gönder',
+            onPressed: onSendVideo,
+            icon: const Icon(Icons.video_call_rounded),
+            color: AppColors.primary,
           ),
           IconButton(
             tooltip: 'Sil',

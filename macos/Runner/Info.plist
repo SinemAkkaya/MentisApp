@@ -28,5 +28,9 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Mentis, terapist ve danışan arasındaki video seansları için kameranıza erişim gerektirir.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Mentis, video seansları sırasında ses iletişimi için mikrofonunuza erişim gerektirir.</string>
 </dict>
 </plist>

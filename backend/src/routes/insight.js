@@ -4,7 +4,7 @@
 
 const express = require('express');
 const { authRequired, therapistOnly } = require('../middleware/jwt');
-const { analyzeMultipleJournals } = require('../insight/nlp-engine-v2');
+const { analyzeMultipleJournals } = require('../insight/nlp-engine-v3');
 const { demoClients, mockJournals } = require('../shared/stores');
 
 const router = express.Router();
@@ -47,7 +47,7 @@ router.post('/', async (req, res) => {
     if (client) clientName = client.name;
   }
 
-  console.log(`✅ Insight analizi tamamlandı (${analysis.analyzedCount} günlük, danışan: ${clientName})`);
+  console.log(`✅ Insight analizi tamamlandı (${analysis.analyzedCount} günlük, danışan: ${clientName}) - PHQ-9: ${analysis.phq9Score}, GAD-7: ${analysis.gad7Score}`);
 
   // Duygu kategorilerini topWords format'ına çevir
   const topWords = Object.entries(analysis.categories || {})
@@ -74,12 +74,17 @@ router.post('/', async (req, res) => {
       tone: analysis.sentiment.label,
       message: analysis.recommendations.join(' • '),
     },
-    moodTrend: analysis.trend || analysis.moodTrend,
-    dominantCategory: analysis.dominantCategory,
+    moodTrend: analysis.trend,
     analyzedCount: analysis.analyzedCount,
     hasData: analysis.analyzedCount > 0,
-    intensity: analysis.intensity || 0,
-    detailedMetrics: analysis.detailedMetrics,
+    intensity: analysis.intensity,
+
+    // Professional metrics
+    phq9Score: analysis.phq9Score,
+    gad7Score: analysis.gad7Score,
+    phq9Interpretation: analysis.explanation?.phq9?.severity || '',
+    gad7Interpretation: analysis.explanation?.gad7?.severity || '',
+    explanation: analysis.explanation,
   });
 });
 

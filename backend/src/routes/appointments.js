@@ -5,7 +5,7 @@
 const express = require('express');
 const prisma = require('../prisma');
 const { authRequired } = require('../middleware/jwt');
-const { mockAppointments } = require('../shared/stores');
+const { mockAppointments, demoClients } = require('../shared/stores');
 
 const router = express.Router();
 
@@ -27,9 +27,13 @@ router.post('/', async (req, res) => {
 
   // 🔥 DEMO MOD: Mock store'a ekle
   const appointmentId = `appt-${Date.now()}`;
+  const client = demoClients.get(req.user.id);
+  const clientName = client?.name || req.user.name || 'Anonim';
+
   const newAppointment = {
     id: appointmentId,
     clientId: req.user.id,
+    clientName: clientName,
     timeSlot: String(timeSlot),
     dayOfWeek: String(dayOfWeek),
     note: note ? String(note).trim() : '',
@@ -37,7 +41,7 @@ router.post('/', async (req, res) => {
     createdAt: new Date(),
   };
   mockAppointments.set(appointmentId, newAppointment);
-  console.log(`✅ [DEMO] Randevu oluşturuldu: ${dayOfWeek} ${timeSlot}`);
+  console.log(`✅ [DEMO] Randevu oluşturuldu: ${dayOfWeek} ${timeSlot} - ${clientName}`);
   res.status(201).json(newAppointment);
 });
 
@@ -49,7 +53,17 @@ router.post('/', async (req, res) => {
  */
 router.get('/', async (req, res) => {
   // 🔥 DEMO MOD: Mock store'dan döndür
-  const appointmentList = Array.from(mockAppointments.values());
+  let appointmentList = Array.from(mockAppointments.values());
+
+  // clientName ekle
+  appointmentList = appointmentList.map(a => {
+    const client = demoClients.get(a.clientId);
+    return {
+      ...a,
+      clientName: client?.name || 'Anonim'
+    };
+  });
+
   console.log(`✅ [DEMO] Randevu listesi (${appointmentList.length} randevu)`);
   res.json(appointmentList);
 });

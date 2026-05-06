@@ -363,6 +363,30 @@ class ApiService {
     final res = await _post('/insight', body) as Map<String, dynamic>;
     return MentisInsight.fromJson(res);
   }
+
+  // ────────────────────────────────────────────────────────────
+  //  GENERIC HTTP METHODS
+  // ────────────────────────────────────────────────────────────
+
+  /// Generic GET request for custom endpoints
+  Future<dynamic> get(String path, {bool auth = true}) {
+    return _get(path, auth: auth);
+  }
+
+  /// Generic POST request for custom endpoints
+  Future<dynamic> post(String path, Map<String, dynamic> body, {bool auth = true}) {
+    return _post(path, body, auth: auth);
+  }
+
+  /// Generic PATCH request for custom endpoints
+  Future<dynamic> patch(String path, Map<String, dynamic> body, {bool auth = true}) {
+    return _patch(path, body, auth: auth);
+  }
+
+  /// Generic DELETE request for custom endpoints
+  Future<dynamic> delete(String path, {bool auth = true}) {
+    return _delete(path, auth: auth);
+  }
 }
 
 class ApiException implements Exception {
@@ -388,6 +412,11 @@ class MentisInsight {
   final bool hasData;
   final int intensity; // 0-10 şiddet seviyesi
   final String moodTrend; // "improving", "declining", "stable"
+  final int phq9Score; // PHQ-9: Depresyon ölçeği (0-27)
+  final int gad7Score; // GAD-7: Anksiyete ölçeği (0-21)
+  final String phq9Interpretation;
+  final String gad7Interpretation;
+  final Map<String, dynamic>? explanation; // Detaylı açıklama
 
   MentisInsight({
     required this.clientName,
@@ -400,6 +429,11 @@ class MentisInsight {
     required this.hasData,
     required this.intensity,
     required this.moodTrend,
+    required this.phq9Score,
+    required this.gad7Score,
+    required this.phq9Interpretation,
+    required this.gad7Interpretation,
+    this.explanation,
   });
 
   factory MentisInsight.fromJson(Map<String, dynamic> m) {
@@ -424,6 +458,11 @@ class MentisInsight {
       hasData: m['hasData'] == true,
       intensity: (m['intensity'] as num?)?.toInt() ?? 0,
       moodTrend: m['moodTrend']?.toString() ?? 'stable',
+      phq9Score: (m['phq9Score'] as num?)?.toInt() ?? 0,
+      gad7Score: (m['gad7Score'] as num?)?.toInt() ?? 0,
+      phq9Interpretation: m['phq9Interpretation']?.toString() ?? '',
+      gad7Interpretation: m['gad7Interpretation']?.toString() ?? '',
+      explanation: m['explanation'] as Map<String, dynamic>?,
     );
   }
 }
